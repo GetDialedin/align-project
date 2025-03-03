@@ -111,4 +111,18 @@ callButton.addEventListener('click', async () => {
     }).catch(error => {
         console.error('Error connecting to Twilio Video:', error);
     });
+    // Add error handling for token fetching
+    try {
+        const response = await fetch('https://align-project.vercel.app/token');
+        if (!response.ok) {
+            throw new Error(`Token fetch failed with status: ${response.status}`);
+        }
+        const data = await response.json();
+        const token = data.token;
+        console.log('Token fetched successfully:', token);
+    } catch (error) {
+        console.error('Error fetching token:', error);
+        return; // Exit the function if token fetching fails
+    }
+
 });
