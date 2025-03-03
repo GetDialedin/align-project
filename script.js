@@ -16,9 +16,9 @@ document.getElementById('registrationForm').addEventListener('submit', async fun
     });
     
     if (error) {
-        alert('Registration failed: ' + error.message);
+        document.getElementById('registrationFeedback').innerText = 'Registration failed: ' + error.message;
     } else {
-        alert('User ' + username + ' registered successfully.');
+        document.getElementById('registrationFeedback').innerText = 'User ' + username + ' registered successfully.';
     }
 });
 
@@ -35,9 +35,10 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
     });
     
     if (error) {
-        alert('Login failed: ' + error.message);
+        a;
     } else {
-        alert('User ' + loginUsername + ' logged in successfully.');
+        document.getElementById('loginFeedback').innerText = 'User ' + loginUsername + ' logged in successfully.';
+        window.location.href = '/home';
     }
 });
 
