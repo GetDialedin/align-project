@@ -73,3 +73,42 @@ document.getElementById('paymentForm').addEventListener('submit', async function
         alert('Payment successful!');
     }
 });
+// Initialize Twilio Video call
+const callButton = document.getElementById('call-button');
+
+callButton.addEventListener('click', async () => {
+    // Fetch a token from the server
+    const response = await fetch('/get-twilio-token');
+    const data = await response.json();
+    const token = data.token;
+
+    // Initialize Twilio Video client
+    const Video = Twilio.Video;
+    Video.connect(token, { name: 'expert-room' }).then(room => {
+        console.log('Connected to Twilio Video room:', room.name);
+
+        // Attach local video and audio tracks to the DOM
+        const localTracks = room.localParticipant.tracks;
+        localTracks.forEach(trackPublication => {
+            if (trackPublication.track) {
+                document.getElementById('local-media').appendChild(trackPublication.track.attach());
+            }
+        });
+
+        // Attach remote participants' video and audio tracks to the DOM
+        room.on('participantConnected', participant => {
+            console.log('Participant connected:', participant.identity);
+            participant.tracks.forEach(trackPublication => {
+                if (trackPublication.track) {
+                    document.getElementById('remote-media').appendChild(trackPublication.track.attach());
+                }
+            });
+
+            participant.on('trackSubscribed', track => {
+                document.getElementById('remote-media').appendChild(track.attach());
+            });
+        });
+    }).catch(error => {
+        console.error('Error connecting to Twilio Video:', error);
+    });
+});
