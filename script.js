@@ -8,20 +8,64 @@ document.getElementById('registrationForm').addEventListener('submit', async fun
     event.preventDefault();
     const username = document.getElementById('username').value;
     const password = document.getElementById('password').value;
+    const phone = document.getElementById('phone').value;
+    // Send verification code using Twilio Verify
+async function sendVerificationCode(phoneNumber) {
+    try {
+        const response = await fetch('/api/send-verification-code', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ phoneNumber })
+        });
+        const data = await response.json();
+        if (data.success) {
+            const verificationCode = prompt('Enter the verification code sent to your phone:');
+            return verifyCode(phoneNumber, verificationCode);
+        } else {
+            alert('Failed to send verification code.');
+            return false;
+        }
+    } catch (error) {
+        console.error('Error sending verification code:', error);
+        return false;
+    }
+}
+
+// Verify the entered code using Twilio Verify
+async function verifyCode(phoneNumber, code) {
+    try {
+        const response = await fetch('/api/verify-code', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ phoneNumber, code })
+        });
+        const data = await response.json();
+        return data.success;
+    } catch (error) {
+        console.error('Error verifying code:', error);
+        return false;
+    }
+}
     
-    // Register user with Supabase
+// Register user with Supabase after phone verification
+if (await sendVerificationCode(phone)) {
     const { user, error } = await supabase.auth.signUp({
         email: username,
         password: password
     });
-    
+
     if (error) {
         document.getElementById('registrationFeedback').innerText = 'Registration failed: ' + error.message;
     } else {
         document.getElementById('registrationFeedback').innerText = 'User ' + username + ' registered successfully.';
     }
-});
-
+} else {
+    document.getElementById('registrationFeedback').innerText = 'Phone verification failed.';
+}
 // Handle login form submission
 document.getElementById('loginForm').addEventListener('submit', async function(event) {
     event.preventDefault();
